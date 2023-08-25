@@ -15,7 +15,7 @@ try:
     from ansible_collections.ansibleguy.opnsense.plugins.module_utils.helper.main import diff_remove_empty
     from ansible_collections.ansibleguy.opnsense.plugins.module_utils.defaults.main import \
         OPN_MOD_ARGS, STATE_ONLY_MOD_ARG, RELOAD_MOD_ARG
-    from ansible_collections.ansibleguy.opnsense.plugins.module_utils.main.interface_vlan import Vlan
+    from ansible_collections.ansibleguy.opnsense.plugins.module_utils.main.interface import Interface
 
 except MODULE_EXCEPTIONS:
     module_dependency_error()
@@ -28,7 +28,7 @@ EXAMPLES = 'https://opnsense.ansibleguy.net/en/latest/modules/interface.html'
 
 def run_module():
     module_args = dict(
-        name=dict(type='str', required=False, aliases=['vlanif', 'name']),
+        # name=dict(type='str', required=True, aliases=['vlanif']),  # can't be configured
         interface=dict(
             type='str', required=False, aliases=['parent', 'port', 'int', 'if'],
             description='Existing VLAN capable interface - you must provide the network '
@@ -42,7 +42,7 @@ def run_module():
             type='int', required=False, default=0, aliases=['prio', 'pcp'],
             description='802.1Q VLAN PCP (priority code point)'
         ),
-        description=dict(type='str', required=True, aliases=['desc']),
+        description=dict(type='str', required=True, aliases=['desc', 'name']),
         **RELOAD_MOD_ARG,
         **STATE_ONLY_MOD_ARG,
         **OPN_MOD_ARGS,
@@ -61,22 +61,22 @@ def run_module():
         supports_check_mode=True,
     )
 
-    vlan = Vlan(module=module, result=result)
+    interface = Interface(module=module, result=result)
 
     def process():
-        vlan.check()
-        vlan.process()
+        interface.check()
+        interface.process()
         if result['changed'] and module.params['reload']:
-            vlan.reload()
+            interface.reload()
 
     if PROFILE or module.params['debug']:
-        profiler(check=process, log_file='interface_vlan.log')
+        profiler(check=process, log_file='interface.log')
         # log in /tmp/ansibleguy.opnsense/
 
     else:
         process()
 
-    vlan.s.close()
+    interface.s.close()
     result['diff'] = diff_remove_empty(result['diff'])
     module.exit_json(**result)
 

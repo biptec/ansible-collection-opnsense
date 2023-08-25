@@ -1,6 +1,6 @@
 ---
 
-namespace: 'ansibleguy'
+namespace: 'biptec'
 name: 'opnsense'
 version: 1.2.6
 readme: 'README.md'
@@ -17,8 +17,8 @@ tags:
   - 'security'
   - 'filter'
 dependencies: {}
-repository: 'https://github.com/ansibleguy/collection_opnsense'
+repository: 'https://github.com/biptec/ansible-collection-opnsense'
 documentation: 'https://opnsense.ansibleguy.net'
 homepage: 'https://ansibleguy.net'
-issues: 'https://github.com/ansibleguy/collection_opnsense/issues'
+issues: 'https://github.com/biptec/ansible-collection-opnsense'
 build_ignore: []
