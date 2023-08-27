@@ -41,6 +41,7 @@ action_groups:
     - ansibleguy.opnsense.wireguard_show
     - ansibleguy.opnsense.wireguard_general
   interface:
+    - ansibleguy.opnsense.interface
     - ansibleguy.opnsense.interface_vlan
     - ansibleguy.opnsense.interface_vxlan
     - ansibleguy.opnsense.interface_vip

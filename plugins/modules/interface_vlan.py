@@ -7,42 +7,60 @@
 
 from ansible.module_utils.basic import AnsibleModule
 
-from ansible_collections.ansibleguy.opnsense.plugins.module_utils.base.handler import \
-    module_dependency_error, MODULE_EXCEPTIONS
+from ansible_collections.ansibleguy.opnsense.plugins.module_utils.base.handler import (
+    module_dependency_error,
+    MODULE_EXCEPTIONS,
+)
 
 try:
-    from ansible_collections.ansibleguy.opnsense.plugins.module_utils.helper.utils import profiler
-    from ansible_collections.ansibleguy.opnsense.plugins.module_utils.helper.main import diff_remove_empty
-    from ansible_collections.ansibleguy.opnsense.plugins.module_utils.defaults.main import \
-        OPN_MOD_ARGS, STATE_ONLY_MOD_ARG, RELOAD_MOD_ARG
-    from ansible_collections.ansibleguy.opnsense.plugins.module_utils.main.interface_vlan import Vlan
+    from ansible_collections.ansibleguy.opnsense.plugins.module_utils.helper.utils import (
+        profiler,
+    )
+    from ansible_collections.ansibleguy.opnsense.plugins.module_utils.helper.main import (
+        diff_remove_empty,
+    )
+    from ansible_collections.ansibleguy.opnsense.plugins.module_utils.defaults.main import (
+        OPN_MOD_ARGS,
+        STATE_ONLY_MOD_ARG,
+        RELOAD_MOD_ARG,
+    )
+    from ansible_collections.ansibleguy.opnsense.plugins.module_utils.main.interface_vlan import (
+        Vlan,
+    )
 
 except MODULE_EXCEPTIONS:
     module_dependency_error()
 
 PROFILE = False  # create log to profile time consumption
 
-DOCUMENTATION = 'https://opnsense.ansibleguy.net/en/latest/modules/interface.html'
-EXAMPLES = 'https://opnsense.ansibleguy.net/en/latest/modules/interface.html'
+DOCUMENTATION = "https://opnsense.ansibleguy.net/en/latest/modules/interface.html"
+EXAMPLES = "https://opnsense.ansibleguy.net/en/latest/modules/interface.html"
 
 
 def run_module():
     module_args = dict(
-        name=dict(type='str', required=False, aliases=['vlanif', 'name']),
+        name=dict(type="str", required=False, aliases=["vlanif"]),
         interface=dict(
-            type='str', required=False, aliases=['parent', 'port', 'int', 'if'],
-            description='Existing VLAN capable interface - you must provide the network '
-                        "port as shown in 'Interfaces - Assignments - Network port'"
+            type="str",
+            required=False,
+            aliases=["parent", "port", "int", "if"],
+            description="Existing VLAN capable interface - you must provide the network "
+            "port as shown in 'Interfaces - Assignments - Network port'",
         ),
         vlan=dict(
-            type='int', required=False, aliases=['tag', 'id'],
-            description='802.1Q VLAN tag (between 1 and 4094)'
+            type="int",
+            required=False,
+            aliases=["tag", "id"],
+            description="802.1Q VLAN tag (between 1 and 4094)",
         ),
         priority=dict(
-            type='int', required=False, default=0, aliases=['prio', 'pcp'],
-            description='802.1Q VLAN PCP (priority code point)'
+            type="int",
+            required=False,
+            default=0,
+            aliases=["prio", "pcp"],
+            description="802.1Q VLAN PCP (priority code point)",
         ),
-        description=dict(type='str', required=True, aliases=['desc']),
+        description=dict(type="str", required=False, aliases=["desc"], default=""),
         **RELOAD_MOD_ARG,
         **STATE_ONLY_MOD_ARG,
         **OPN_MOD_ARGS,
@@ -51,9 +69,9 @@ def run_module():
     result = dict(
         changed=False,
         diff={
-            'before': {},
-            'after': {},
-        }
+            "before": {},
+            "after": {},
+        },
     )
 
     module = AnsibleModule(
@@ -66,18 +84,18 @@ def run_module():
     def process():
         vlan.check()
         vlan.process()
-        if result['changed'] and module.params['reload']:
+        if result["changed"] and module.params["reload"]:
             vlan.reload()
 
-    if PROFILE or module.params['debug']:
-        profiler(check=process, log_file='interface_vlan.log')
+    if PROFILE or module.params["debug"]:
+        profiler(check=process, log_file="interface_vlan.log")
         # log in /tmp/ansibleguy.opnsense/
 
     else:
         process()
 
     vlan.s.close()
-    result['diff'] = diff_remove_empty(result['diff'])
+    result["diff"] = diff_remove_empty(result["diff"])
     module.exit_json(**result)
 
 
@@ -85,5 +103,5 @@ def main():
     run_module()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

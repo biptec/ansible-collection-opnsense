@@ -7,42 +7,96 @@
 
 from ansible.module_utils.basic import AnsibleModule
 
-from ansible_collections.ansibleguy.opnsense.plugins.module_utils.base.handler import \
-    module_dependency_error, MODULE_EXCEPTIONS
+from ansible_collections.ansibleguy.opnsense.plugins.module_utils.base.handler import (
+    module_dependency_error,
+    MODULE_EXCEPTIONS,
+)
 
 try:
-    from ansible_collections.ansibleguy.opnsense.plugins.module_utils.helper.utils import profiler
-    from ansible_collections.ansibleguy.opnsense.plugins.module_utils.helper.main import diff_remove_empty
-    from ansible_collections.ansibleguy.opnsense.plugins.module_utils.defaults.main import \
-        OPN_MOD_ARGS, STATE_ONLY_MOD_ARG, RELOAD_MOD_ARG
-    from ansible_collections.ansibleguy.opnsense.plugins.module_utils.main.interface import Interface
+    from ansible_collections.ansibleguy.opnsense.plugins.module_utils.helper.utils import (
+        profiler,
+    )
+    from ansible_collections.ansibleguy.opnsense.plugins.module_utils.helper.main import (
+        diff_remove_empty,
+    )
+    from ansible_collections.ansibleguy.opnsense.plugins.module_utils.defaults.main import (
+        OPN_MOD_ARGS,
+        STATE_ONLY_MOD_ARG,
+        RELOAD_MOD_ARG,
+    )
+    from ansible_collections.ansibleguy.opnsense.plugins.module_utils.main.interface import (
+        Interface,
+    )
 
 except MODULE_EXCEPTIONS:
     module_dependency_error()
 
 PROFILE = False  # create log to profile time consumption
 
-DOCUMENTATION = 'https://opnsense.ansibleguy.net/en/latest/modules/interface.html'
-EXAMPLES = 'https://opnsense.ansibleguy.net/en/latest/modules/interface.html'
+DOCUMENTATION = "https://opnsense.ansibleguy.net/en/latest/modules/interface.html"
+EXAMPLES = "https://opnsense.ansibleguy.net/en/latest/modules/interface.html"
 
 
 def run_module():
     module_args = dict(
-        # name=dict(type='str', required=True, aliases=['vlanif']),  # can't be configured
-        interface=dict(
-            type='str', required=False, aliases=['parent', 'port', 'int', 'if'],
-            description='Existing VLAN capable interface - you must provide the network '
-                        "port as shown in 'Interfaces - Assignments - Network port'"
+        interface=dict(type="str", required=True, aliases=["int"]),
+        name=dict(type="str", required=False, aliases=["id"]),
+        description=dict(
+            type="str",
+            required=False,
+            aliases=["desc"],
+            default="",
+            description="Enter a description (name) for the interface here",
         ),
-        vlan=dict(
-            type='int', required=False, aliases=['tag', 'id'],
-            description='802.1Q VLAN tag (between 1 and 4094)'
+        enable=dict(type="bool", required=False, default=False),
+        lock=dict(type="bool", required=False, default=False),
+        block_bogon_networks=dict(type="bool", required=False, default=False),
+        block_private_networks=dict(type="bool", required=False, default=False),
+        promiscuous_mode=dict(type="bool", required=False, default=False),
+        mtu=dict(type="int", required=False, default=1500),
+        mac_address=dict(type="str", required=False, default=""),
+        type4=dict(
+            type="str",
+            required=False,
+            default="none",
+            description="IPv4 Configuration Type",
         ),
-        priority=dict(
-            type='int', required=False, default=0, aliases=['prio', 'pcp'],
-            description='802.1Q VLAN PCP (priority code point)'
+        ip4=dict(
+            type="str",
+            required=False,
+            default="",
         ),
-        description=dict(type='str', required=True, aliases=['desc', 'name']),
+        mask4=dict(
+            type="str",
+            required=False,
+            default="",
+        ),
+        gw4=dict(
+            type="str",
+            required=False,
+            default="",
+        ),
+        type6=dict(
+            type="str",
+            required=False,
+            default="none",
+            description="IPv6 Configuration Type",
+        ),
+        ip6=dict(
+            type="str",
+            required=False,
+            default="",
+        ),
+        mask6=dict(
+            type="str",
+            required=False,
+            default="",
+        ),
+        gw6=dict(
+            type="str",
+            required=False,
+            default="",
+        ),
         **RELOAD_MOD_ARG,
         **STATE_ONLY_MOD_ARG,
         **OPN_MOD_ARGS,
@@ -51,9 +105,9 @@ def run_module():
     result = dict(
         changed=False,
         diff={
-            'before': {},
-            'after': {},
-        }
+            "before": {},
+            "after": {},
+        },
     )
 
     module = AnsibleModule(
@@ -66,18 +120,18 @@ def run_module():
     def process():
         interface.check()
         interface.process()
-        if result['changed'] and module.params['reload']:
+        if result["changed"] and module.params["reload"]:
             interface.reload()
 
-    if PROFILE or module.params['debug']:
-        profiler(check=process, log_file='interface.log')
+    if PROFILE or module.params["debug"]:
+        profiler(check=process, log_file="interface.log")
         # log in /tmp/ansibleguy.opnsense/
 
     else:
         process()
 
     interface.s.close()
-    result['diff'] = diff_remove_empty(result['diff'])
+    result["diff"] = diff_remove_empty(result["diff"])
     module.exit_json(**result)
 
 
@@ -85,5 +139,5 @@ def main():
     run_module()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
